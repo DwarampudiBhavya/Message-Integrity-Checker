@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Data Integrity Node</title>
+<!-- Tailwind CSS with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            lavender: {
+              50: '#f6f5ff',
+              100: '#ede9fe',
+              200: '#e6e1ff',
+            },
+            deepPurple: '#2d2a4a',
+            mutedPurple: '#7c7aa5',
+            primaryPurple: '#7c3aed',
+            hoverPurple: '#6d28d9',
+            accentPurple: '#a78bfa',
+            success: '#22c55e',
+            warning: '#f59e0b',
+            error: '#ef4444',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+<style data-purpose="animations">
+    @keyframes pulse-vertical {
+      0%, 100% { opacity: 0.3; height: 40px; }
+      50% { opacity: 1; height: 60px; }
+    }
+    .animate-pulse-v {
+      animation: pulse-vertical 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f6f5ff;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #a78bfa;
+      border-radius: 10px;
+    }
+  </style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+</head>
+<body class="bg-lavender-50 text-deepPurple font-sans min-h-screen p-4 md:p-8">
+<!-- BEGIN: MainContainer -->
+<main class="max-w-md mx-auto space-y-6">
+<!-- BEGIN: SenderNode -->
+<section class="bg-white border border-lavender-200 rounded-lg shadow-sm p-6" data-purpose="outbound-node-interface" id="sender-node">
+<div class="flex items-center space-x-2 mb-4">
+<div class="w-2.5 h-2.5 rounded-full bg-primaryPurple shadow-[0_0_8px_rgba(124,58,237,0.4)]"></div>
+<h2 class="text-sm font-bold uppercase tracking-widest text-primaryPurple">Sender</h2>
+</div>
+<div class="space-y-4">
+<!-- Input for original data -->
+<div>
+<label class="block text-xs font-medium text-mutedPurple mb-1" for="payload-input">Payload Data</label>
+<textarea class="w-full bg-lavender-50 border-lavender-200 rounded-md text-sm text-deepPurple focus:ring-primaryPurple focus:border-primaryPurple custom-scrollbar" id="payload-input" placeholder="Enter secure message..." rows="3"></textarea>
+</div>
+<!-- Hash Logic Toggle -->
+<div class="flex items-center justify-between bg-lavender-50/50 p-3 rounded-md border border-lavender-200/50">
+<span class="text-xs font-medium text-deepPurple">Hash Logic: <span class="text-primaryPurple" id="logic-label">MD5</span></span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" id="hash-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-lavender-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primaryPurple"></div>
+<span class="ml-3 text-xs font-medium text-deepPurple sr-only">Toggle SHA-1</span>
+</label>
+</div>
+<button class="w-full py-2.5 bg-primaryPurple hover:bg-hoverPurple text-white font-bold rounded-md transition-all active:scale-[0.98] shadow-lg shadow-primaryPurple/20 text-sm" id="compute-hash-btn">Generate</button>
+<!-- Preview Area -->
+<div class="mt-4">
+<span class="block text-xs font-medium text-mutedPurple mb-1">Packet Preview</span>
+<div class="bg-lavender-50 border border-lavender-200 rounded p-3 font-mono text-[10px] break-all text-primaryPurple/80 min-h-[40px]" id="packet-preview">
+            [AWAITING_ENCRYPTION]
+          </div>
+</div>
+</div>
+</section>
+<div class="flex justify-center py-4 relative z-10 items-center space-x-4">
+<label class="flex items-center space-x-2 text-xs font-medium text-deepPurple">
+  <span>Intercept</span>
+  <input id="intercept-toggle" type="checkbox" class="h-4 w-4 text-primaryPurple border-gray-300 rounded focus:ring-primaryPurple" />
+</label>
+<button class="w-full max-w-[200px] py-2.5 bg-primaryPurple hover:bg-hoverPurple text-white font-bold rounded-md transition-all active:scale-[0.98] shadow-lg shadow-primaryPurple/20 text-sm flex items-center justify-center space-x-2" id="transmit-btn">
+<span class="material-symbols-outlined text-xl">send</span>
+<span>Transmit</span>
+</button>
+</div>
+<!-- END: SenderNode -->
+<!-- BEGIN: ReceiverNode -->
+<section class="bg-white border border-lavender-200 rounded-lg shadow-sm p-6" data-purpose="inbound-node-interface" id="receiver-node">
+<div class="flex items-center space-x-2 mb-4">
+<div class="w-2.5 h-2.5 rounded-full bg-accentPurple shadow-[0_0_8px_rgba(167,139,250,0.4)]"></div>
+<h2 class="text-sm font-bold uppercase tracking-widest text-accentPurple">Receiver</h2>
+</div>
+<div class="space-y-4">
+<div>
+<label class="block text-xs font-medium text-mutedPurple mb-1" for="received-input">Received Data Packet</label>
+<textarea class="w-full bg-lavender-50 border-lavender-200 rounded-md text-sm text-deepPurple focus:ring-accentPurple focus:border-accentPurple custom-scrollbar" id="received-input" placeholder="message || digest" rows="3"></textarea>
+</div>
+<button class="w-full py-2.5 bg-lavender-100 hover:bg-lavender-200 text-primaryPurple font-bold rounded-md transition-all active:scale-[0.98] border border-lavender-200 text-sm" id="validate-btn">
+          Validate Authenticity
+        </button>
+</div>
+</section>
+<!-- END: ReceiverNode -->
+<!-- BEGIN: ResultSection -->
+<section class="hidden space-y-4 mt-6" data-purpose="validation-results" id="result-section">
+<!-- Dynamic Alerts -->
+<div class="p-4 rounded-md border flex items-center space-x-3" id="status-alert">
+<div class="flex-shrink-0" id="status-icon"></div>
+<div class="flex-1">
+<p class="text-sm font-bold" id="status-title"></p>
+<p class="text-xs opacity-90" id="status-desc"></p>
+</div>
+</div>
+<!-- Hash Comparison Table -->
+<div class="overflow-hidden border border-lavender-200 rounded-md bg-white">
+<table class="w-full text-left text-xs">
+<thead class="bg-lavender-50 text-mutedPurple font-medium">
+<tr>
+<th class="px-4 py-2 border-b border-lavender-200">Attribute</th>
+<th class="px-4 py-2 border-b border-lavender-200">Hash Value</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-lavender-200">
+<tr>
+<td class="px-4 py-2 text-mutedPurple">Received</td>
+<td class="px-4 py-2 font-mono break-all text-deepPurple" id="table-received-hash">---</td>
+</tr>
+<tr>
+<td class="px-4 py-2 text-mutedPurple">Computed</td>
+<td class="px-4 py-2 font-mono break-all text-deepPurple" id="table-computed-hash">---</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- END: ResultSection -->
+</main>
+<!-- END: MainContainer -->
+
+<!-- CryptoJS library for hashing -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+<script src="js/app.js"></script>
+</body></html>
